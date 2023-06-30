@@ -1,32 +1,47 @@
-const fs = require("fs");
-const path = require("path");
-const HummusRecipe = require("hummus-recipe");
-const tmp = require("tmp");
+const qpdf = require("node-qpdf");
 
-async function encryptPdf(inputPdfBuffer, password) {
-  const inputPdfPath = tmp.tmpNameSync({ postfix: ".pdf" });
-  const outputPdfPath = tmp.tmpNameSync({ postfix: ".pdf" });
+async function encryptPdf(pdfBuffer, password, res, filename) {
+  const options = {
+    keyLength: 256,
+    password,
+    restrictions: {
+      modify: "none",
+      extract: "n",
+    },
+  };
 
-  fs.writeFileSync(inputPdfPath, inputPdfBuffer);
+  try {
+    const encryptedPdf = await new Promise((resolve, reject) => {
+      qpdf.encrypt(pdfBuffer, options, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
 
-  const pdfDoc = new HummusRecipe(inputPdfPath, outputPdfPath);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=${encodeURIComponent(filename)}`
+    );
 
-  pdfDoc
-    .encrypt({
-      userPassword: password,
-      ownerPassword: password,
-      userProtectionFlag: 4, // Prevent copying and editing
-    })
-    .endPDF();
+    res.send(encryptedPdf);
 
-  const encryptedPdfBuffer = fs.readFileSync(outputPdfPath);
+    // res.writeHead(200, {
+    //   "Content-Type": "application/pdf",
+    //   "Access-Control-Allow-Origin": "*",
+    //   "Content-Disposition": `inline; filename=${filename}`,
+    // });
 
-  fs.unlinkSync(inputPdfPath);
-  fs.unlinkSync(outputPdfPath);
-
-  return encryptedPdfBuffer;
+  } catch (err) {
+    console.error("Error encrypting PDF:", err);
+    res.status(500).send("Error encrypting PDF");
+  }
 }
 
 module.exports = {
   encryptPdf,
 };
+

@@ -1,12 +1,12 @@
 const express = require("express");
 const NodeCache = require("node-cache");
-const { PDFDocument } = require("pdf-lib");
 const {
   initBrowser,
   generatePDF,
   generatePDFFromHTML,
 } = require("./utils/pdfUtils");
 const { encryptPdf } = require("./utils/pdfEncryption");
+const { PDFDocument } = require("pdf-lib");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -42,19 +42,19 @@ app.get("/api/url-to-pdf", async (req, res) => {
 
   if (protected === "true" && password) {
     try {
-      pdf = await encryptPdf(pdf, password);
+      await encryptPdf(pdf, password, res, `${encodeURIComponent(url)}.pdf`);
     } catch (err) {
       console.error("Error encrypting PDF:", err);
       return res.status(500).send("Error encrypting PDF");
     }
+  } else {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${encodeURIComponent(url)}.pdf`
+    );
+    res.send(pdf);
   }
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=${encodeURIComponent(url)}.pdf`
-  );
-  res.send(pdf);
 });
 
 app.post("/api/html-to-pdf", async (req, res) => {
@@ -76,16 +76,19 @@ app.post("/api/html-to-pdf", async (req, res) => {
 
   if (protected === "true" && password) {
     try {
-      pdf = await encryptPdf(pdf, password);
+      await encryptPdf(pdf, password, res, "html-to-pdf.pdf");
     } catch (err) {
       console.error("Error encrypting PDF:", err);
       return res.status(500).send("Error encrypting PDF");
     }
+  } else {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=html-to-pdf.pdf`
+    );
+    res.send(pdf);
   }
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename=html-to-pdf.pdf`);
-  res.send(pdf);
 });
 
 (async () => {
