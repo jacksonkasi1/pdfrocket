@@ -71,3 +71,7 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 Replace `https://github.com/yourusername/html-to-pdf-api.git` with your actual repository URL. This `README.md` provides information about the project, its features, requirements, installation steps, usage, and configuration options.
+
+---
+
+## @see https://apitemplate.io/blog/tips-for-generating-pdfs-with-puppeteer/

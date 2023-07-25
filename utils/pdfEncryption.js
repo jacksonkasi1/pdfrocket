@@ -1,7 +1,10 @@
 const qpdf = require("node-qpdf");
 
+// const qpdfPath = require("qpdf");
+
 async function encryptPdf(pdfBuffer, password, res, filename) {
   const options = {
+    // qpdfPath,
     keyLength: 256,
     password,
     restrictions: {

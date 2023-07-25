@@ -17,6 +17,7 @@
     "node-qpdf": "^1.0.3",
     "pdf-lib": "^1.17.1",
     "puppeteer": "^20.7.4",
+    "qpdf": "^0.1.0-prealpha.1",
     "streams": "^0.0.11",
     "tmp": "^0.2.1"
   }
